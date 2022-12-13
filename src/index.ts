@@ -1,7 +1,8 @@
 import * as dotenv from 'dotenv';
-import express, { application } from 'express';
+import express, { application, response } from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
+import { db } from './utils/db.server';
 
 dotenv.config();
 
@@ -25,6 +26,24 @@ app.get('/api/healthcheck', (request: Request, response: Response) => {
     info: 'Project Valkyrie. For more information visit, https://github.com/AlexMNet/project-valkyrie-api',
   };
   response.status(200).send(data);
+});
+
+app.post('/users', async (request: Request, response: Response) => {
+  // const {email, firstName, lastName, role} = request.body;
+  try {
+    const user = request.body;
+    const newUser = await db.user.create({
+      data: user,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+    response.status(200).json(newUser);
+  } catch (error: any) {
+    response.status(500).json(error.message);
+  }
 });
 
 app.listen(PORT, () => {
