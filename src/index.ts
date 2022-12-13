@@ -18,6 +18,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (request: Request, response: Response) => {
+  response.send('Project Valkyrie!');
+});
+
 app.get('/api/healthcheck', (request: Request, response: Response) => {
   const data = {
     uptime: process.uptime(),
