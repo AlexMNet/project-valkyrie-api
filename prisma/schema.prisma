@@ -1,9 +1,14 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+//npx prisma migrate dev
+
+
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
 }
+
 
 datasource db {
   provider = "postgresql"
@@ -11,12 +16,13 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   email String @unique
   firstName String
   lastName String
+  password String
   role Role @default(USER)
   records Record[]
 }
@@ -26,9 +32,9 @@ model Record {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   published Boolean  @default(false)
-  title     String   
+  title     String   @unique
   author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int?
+  authorId  Int?     
 }
 
 

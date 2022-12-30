@@ -1,8 +1,13 @@
 import * as dotenv from 'dotenv';
-import express, { application, response } from 'express';
+import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import type { Request, Response } from 'express';
-import { db } from './utils/db.server';
+import recordRouter from './Record/record.router';
+import authRouter from './Auth/auth.router';
+import globalErrorController from './Error/globalError.controller';
+import AppError from './utils/appError';
+import 'express-async-errors';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -17,8 +22,11 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+app.use('/api/records', recordRouter);
+app.use('/api/auth', authRouter);
 
-app.get('/', (request: Request, response: Response) => {
+app.get('/', (request: Request, response: Response, next: NextFunction) => {
   response.send('Project Valkyrie!');
 });
 
@@ -32,24 +40,14 @@ app.get('/api/healthcheck', (request: Request, response: Response) => {
   response.status(200).send(data);
 });
 
-app.post('/users', async (request: Request, response: Response) => {
-  // const {email, firstName, lastName, role} = request.body;
-  try {
-    const user = request.body;
-    const newUser = await db.user.create({
-      data: user,
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-      },
-    });
-    response.status(200).json(newUser);
-  } catch (error: any) {
-    response.status(500).json(error.message);
-  }
+app.all('*', (request: Request, response: Response, next: NextFunction) => {
+  next(new AppError(404, 'Sorry, this endpoint cannot be found.'));
 });
 
+app.use(globalErrorController);
+
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}...`);
+  console.log(
+    `App listening on port ${PORT} in ${process.env.NODE_ENV} mode...`
+  );
 });
