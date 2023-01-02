@@ -23,6 +23,8 @@ model User {
   firstName String
   lastName String
   password String
+  passwordResetToken String?
+  passwordResetExpires DateTime?
   role Role @default(USER)
   records Record[]
 }
@@ -33,7 +35,7 @@ model Record {
   updatedAt DateTime @updatedAt
   published Boolean  @default(false)
   title     String   @unique
-  author    User?    @relation(fields: [authorId], references: [id])
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  Int?     
 }
 
